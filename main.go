@@ -1,52 +1,31 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
+
+	"github.com/anugrahwl/nearby-places/lib"
+	"github.com/anugrahwl/nearby-places/models"
 )
-
-const (
-	VILLAGE_URL  string = "https://satudata.jabarprov.go.id/api-backend/bigdata/diskominfo/od_kode_wilayah_dan_nama_wilayah_desa_kelurahan"
-	DISTRICT_URL string = "https://satudata.jabarprov.go.id/api-backend/bigdata/diskominfo/od_16357_kode_wilayah_dan_nama_wilayah_kecamatan"
-	CITY_URL     string = "https://satudata.jabarprov.go.id/api-backend/bigdata/diskominfo/od_kode_wilayah_dan_nama_wilayah_kota_kabupaten"
-)
-
-func PrintPrettyJson(jsonData *map[string]interface{}) error {
-	byteData, err := json.MarshalIndent(jsonData, "", "    ")
-	if err != nil {
-		return err
-	}
-	fmt.Println(string(byteData))
-	return nil
-}
-
-func Fetch(url string) models.Request {
-
-}
 
 func main() {
-	// vilageLimit := "?limit1" // "?limit=5957"
-	// districtLimit := "?limit=100" // "?limit=627"
-	cityLimit := "?limit=80"
-	// res, err := http.Get(VILLAGE_URL + vilageLimit)
-	res, err := http.Get(CITY_URL + cityLimit)
+	citiesRequest, err := models.FetchData(models.CITY_URL)
+	if err != nil {
+		fmt.Println(err)
+	}
+	districtRequest, err := models.FetchData(models.DISTRICT_URL)
+	if err != nil {
+		fmt.Println(err)
+	}
+	villagesRequest, err := models.FetchData(models.VILLAGE_URL)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	byteData, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		fmt.Println(err)
-	}
+	cities := models.SeedCitiesWithRequestData(citiesRequest)
+	cityCodeDistricts := models.SeedDistrictsWithRequestData(districtRequest)
+	districtCodeVillages := models.SeedVillagesWithRequestData(villagesRequest)
 
-	var jsonData map[string]interface{}
-	err = json.Unmarshal(byteData, &jsonData)
-
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	PrintPrettyJson(&jsonData)
+	lib.PrintPrettyJson(cities)
+	lib.PrintPrettyJson((*cityCodeDistricts)["32.01"])
+	lib.PrintPrettyJson((*districtCodeVillages)["32.01.01"])
 }
