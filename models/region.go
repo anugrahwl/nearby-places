@@ -6,13 +6,6 @@ import (
 )
 
 type (
-	Location struct {
-		Latitude  float64
-		Longitude float64
-	}
-)
-
-type (
 	Region struct {
 		Code     string
 		Name     string
@@ -53,7 +46,7 @@ func GetUpperRegionCOde(code string) string {
 	return code[:i]
 }
 
-func SeedCitiesWithRequestData(r *Request) *[]Region {
+func SeedCitiesWithRequestData(r *Request) []Region {
 	cities := []Region{}
 	for i := range r.Data {
 		if !IsRegionValid(&r.Data[i]) {
@@ -74,11 +67,11 @@ func SeedCitiesWithRequestData(r *Request) *[]Region {
 		},
 		)
 	}
-	return &cities
+	return cities
 }
 
-func SeedDistrictsWithRequestData(r *Request) *map[string][]*Region {
-	cityCodeDistricts := map[string][]*Region{}
+func SeedDistrictsWithRequestData(r *Request) map[string][]Region {
+	cityCodeDistricts := map[string][]Region{}
 
 	for i := range r.Data {
 		if !IsRegionValid(&r.Data[i]) {
@@ -89,7 +82,7 @@ func SeedDistrictsWithRequestData(r *Request) *map[string][]*Region {
 		name := formatDistrict(r.Data[i].DistrictName)
 		cityCode := GetUpperRegionCOde(code)
 
-		distict := &Region{
+		distict := Region{
 			Code:  code,
 			Name:  name,
 			Level: "Kecamatan",
@@ -99,18 +92,19 @@ func SeedDistrictsWithRequestData(r *Request) *map[string][]*Region {
 			},
 		}
 
-		if _, ok := cityCodeDistricts[cityCode]; ok {
-			cityCodeDistricts[cityCode] = append(cityCodeDistricts[cityCode], distict)
+		if _, ok := cityCodeDistricts[cityCode]; !ok {
+			cityCodeDistricts[cityCode] = []Region{distict}
 		} else {
-			cityCodeDistricts[cityCode] = []*Region{distict}
+			cityCodeDistricts[cityCode] = append(cityCodeDistricts[cityCode], distict)
+
 		}
 	}
 
-	return &cityCodeDistricts
+	return cityCodeDistricts
 }
 
-func SeedVillagesWithRequestData(r *Request) *map[string][]*Region {
-	districtCodeVillages := map[string][]*Region{}
+func SeedVillagesWithRequestData(r *Request) map[string][]Region {
+	districtCodeVillages := map[string][]Region{}
 
 	for i := range r.Data {
 		if !IsRegionValid(&r.Data[i]) {
@@ -121,7 +115,7 @@ func SeedVillagesWithRequestData(r *Request) *map[string][]*Region {
 		name := formatVillage(r.Data[i].VilageName, code)
 		district := GetUpperRegionCOde(code)
 
-		village := &Region{
+		village := Region{
 			Code:  code,
 			Name:  name,
 			Level: "Kelurahan",
@@ -134,9 +128,9 @@ func SeedVillagesWithRequestData(r *Request) *map[string][]*Region {
 		if _, ok := districtCodeVillages[district]; ok {
 			districtCodeVillages[district] = append(districtCodeVillages[district], village)
 		} else {
-			districtCodeVillages[district] = []*Region{village}
+			districtCodeVillages[district] = []Region{village}
 		}
 	}
 
-	return &districtCodeVillages
+	return districtCodeVillages
 }
