@@ -1,5 +1,6 @@
 module github.com/anugrahwl/nearby-places
 
+// +heroku goVersion go1.18
 go 1.17
 
 require (
